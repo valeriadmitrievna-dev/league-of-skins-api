@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { getSkinsController } from '../controllers/skin';
+import { getSkinController, getSkinsController } from '../controllers/skin';
 
 const router = Router();
 
 router.get('/', getSkinsController);
+router.get('/:id', getSkinController);
 
 export default router;

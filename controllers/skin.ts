@@ -52,3 +52,28 @@ export const getSkinsController = async (
     next(error);
   }
 };
+
+export const getSkinController = async (
+  req: Request<{ id: string }>,
+  res: Response<LocalSkin | null>,
+  next: NextFunction,
+) => {
+  try {
+    const language = req.get('App-Language') ?? 'en_US';
+    const appData = await getLangAppData(language);
+
+    if (!appData) {
+      return res.status(500).json(null);
+    }
+
+    const skin = appData.skins.find((skin) => skin.contentId.toString() === req.params.id);
+
+    if (!skin) {
+      return res.status(404).json({ reqParamsId: req.params.id } as any);
+    }
+
+    return res.json(skin);
+  } catch (error) {
+    next(error);
+  }
+};
