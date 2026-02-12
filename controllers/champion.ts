@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { getLangAppData } from '../data';
 import { LocalChampion, PaginatedData } from '../models';
+import { checkSearch } from '../utils/checkSearch';
 
 export const getChampionsController = async (
   req: Request<{}, {}, {}, { search?: string }>,
@@ -16,8 +17,8 @@ export const getChampionsController = async (
       return res.status(500).json({ count: 0, data: [] });
     }
 
-    const champions = appData.champions.filter(champion => {
-      if (search) return champion.name.toLowerCase().includes(search.toLowerCase());
+    const champions = appData.champions.filter((champion) => {
+      if (search) return checkSearch(champion.name, search);
       return true;
     });
 

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { getLangAppData } from '../data';
 import { getRaritiesList } from '../utils';
 import { LocalSkin, PaginatedData } from '../models';
+import { checkSearch } from '../utils/checkSearch';
 
 export const getSkinsController = async (
   req: Request<
@@ -38,7 +39,7 @@ export const getSkinsController = async (
         .flat()
         .map((color) => color.toLowerCase());
       const championIdFilter = championId ? skin.championId === championId : true;
-      const searchFilter = search ? skin.name.toLowerCase().includes(search.toLowerCase()) : true;
+      const searchFilter = search ? checkSearch(skin.name, search) : true;
       const skinlineFilter = skinlineId ? !!skin.skinlines.find((skinline) => skinline.id.toString() === skinlineId) : true;
       const colorsFilter = colors?.length ? checker(allColors, colors) : true;
       const rarityFilter = rarity ? skin.rarity === rarity : true;

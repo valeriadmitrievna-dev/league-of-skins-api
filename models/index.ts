@@ -17,9 +17,13 @@ export interface SkinDto {
   id: number;
   contentId: string;
   isBase: boolean;
+  isLegacy: boolean;
   name: string;
   splashPath: string;
   uncenteredSplashPath: string;
+  collectionCardHoverVideoPath?: string;
+  collectionSplashVideoPath?: string;
+  splashVideoPath?: string;
   tilePath: string;
   loadScreenPath: string;
   rarity: string;
@@ -27,6 +31,11 @@ export interface SkinDto {
   chromas: ChromaDto[];
   skinLines: { id: number }[];
   description: string;
+  skinFeaturePreviewData?: {
+    description: string;
+    iconPath: string;
+    videoPath: string;
+  }[];
 }
 
 export interface ChampionDto {
@@ -80,6 +89,7 @@ export interface LocalChroma {
 
 export interface LocalSkin {
   id: number;
+  description: string;
   championId: string;
   championName: string;
   contentId: string;
@@ -88,10 +98,21 @@ export interface LocalSkin {
     full: string | null;
     loading: string | null;
   };
+  video?: {
+    centered: string | null;
+    uncentered: string | null;
+    card: string | null;
+  };
   rarity: string;
+  isLegacy: boolean;
   chromaPath: string | null;
   chromas: LocalChroma[];
   skinlines: LocalSkinline[];
+  features?: {
+    description: string;
+    iconPath: string;
+    videoPath: string;
+  }[];
 }
 
 export interface LocalData {

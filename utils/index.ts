@@ -64,7 +64,7 @@ export const getChampionData = async (championKey: string, lang: string = 'defau
   }
 };
 
-export const getCDragonPath = (assetPath: string) => {
+export const getCDragonPath = (assetPath?: string) => {
   if (!assetPath) return null;
 
   const path = assetPath.replace(/^\/?lol-game-data\/assets\//i, '').toLowerCase();

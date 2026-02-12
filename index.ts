@@ -4,6 +4,7 @@ import config from './config/config';
 import { writeFile } from 'fs';
 import app from './app';
 import { getLangAppData } from './data';
+import { format } from 'date-fns';
 
 const diffHours = (date1: Date, date2: Date) => {
   const diffMilliseconds = Math.abs(date1.getTime() - date2.getTime());
@@ -15,7 +16,7 @@ const saveToJson = <T>(path: string, data: T) => {
   try {
     writeFile(path, JSON.stringify(data), 'utf-8', () => {});
   } catch (error) {
-    console.log('[DEV][ERROR]', '-- ERROR SAVING DATA --');
+    console.log('[DEV][ERROR]', 'ERROR SAVING DATA');
   }
 };
 
@@ -48,14 +49,26 @@ const getDataByLang = async (lang: string) => {
 
       const mappedSkins: LocalSkin[] = skins.map((skin) => ({
         id: skin.id,
+        isLegacy: !!skin.isLegacy,
         contentId: skin.contentId,
         championId: champion.id,
         championName: champion.name,
         name: skin.name,
+        description: skin.description,
+        features: skin.skinFeaturePreviewData,
         image: {
           full: getCDragonPath(skin.splashPath),
           loading: getCDragonPath(skin.loadScreenPath),
         },
+        ...(skin.splashVideoPath || skin.collectionSplashVideoPath || skin.collectionCardHoverVideoPath
+          ? {
+              video: {
+                centered: getCDragonPath(skin.splashVideoPath),
+                uncentered: getCDragonPath(skin.collectionSplashVideoPath),
+                card: getCDragonPath(skin.collectionCardHoverVideoPath),
+              },
+            }
+          : {}),
         rarity: skin.rarity,
         chromaPath: getCDragonPath(skin.chromaPath),
         chromas:
@@ -91,15 +104,18 @@ const getDataByLang = async (lang: string) => {
 };
 
 const prepareData = async () => {
+  const getDateNow = () => format(new Date(), 'dd.MM.yyyy HH:mm');
+
   try {
     const languages = (await getLanguages()) ?? [];
     const updateDate = new Date();
 
     console.log();
-    console.log('[DEV]', '-- PREPARE START --');
+    console.log('[DEV]', `[${getDateNow()}]`, 'PREPARE START');
     const prepareStartTime = performance.now();
 
     for await (const language of languages) {
+      const loadLangStart = performance.now();
       const langData = await getLangAppData(language);
       const lastUpdated = langData?.updated;
       const updateDiff = config.dataUpdateDays * 24;
@@ -109,7 +125,7 @@ const prepareData = async () => {
         continue;
       }
 
-      console.log('[DEV]', `-- LOAD ${language} --`);
+      console.log('[DEV]', `[${getDateNow()}]`, `${language} loading...`);
 
       const dataByLang = await getDataByLang(language);
       const data: LocalData = {
@@ -118,20 +134,23 @@ const prepareData = async () => {
         ...dataByLang,
       };
       saveToJson(`./data/${language}.json`, data);
+      const loadLangEnd = performance.now();
+      console.log('[DEV]', `[${getDateNow()}]`, `${language} loaded [${Math.round(loadLangEnd - loadLangStart) / 1000}s]`);
     }
 
     const prepareEndTime = performance.now();
-    console.log('[DEV]', '-- PREPARE END --');
-    console.log('[DEV]', `-- TIME: ${Math.round(prepareEndTime - prepareStartTime) / 1000}s --`);
+    console.log('[DEV]', `[${getDateNow()}]`, 'PREPARE END');
+    const preparingTimeSeconds = Math.round(prepareEndTime - prepareStartTime) / 1000;
+    console.log('[DEV]', `TIME: ${preparingTimeSeconds}s`);
     console.log();
   } catch (error) {
-    console.log('[DEV][ERROR]', '-- NOT PREPARED --');
+    console.log('[DEV][ERROR]', `[${getDateNow()}]`, 'NOT PREPARED');
     console.error(error);
   }
 };
 
 app.listen(config.port, async () => {
-  await prepareData();
+  prepareData();
 
   console.log(`Server running on port ${config.port}`);
 });
