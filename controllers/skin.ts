@@ -15,6 +15,7 @@ export const getSkinsController = async (
       search?: string;
       colors?: string;
       rarity?: string;
+      isLegacy: string;
     }
   >,
   res: Response<PaginatedData<LocalSkin[]>>,
@@ -28,8 +29,9 @@ export const getSkinsController = async (
       return res.status(500).json({ count: 0, data: [] });
     }
 
-    const { championId, skinlineId, search, colors: queryColors, rarity } = req.query;
+    const { championId, skinlineId, search, colors: queryColors, rarity, isLegacy: queryLegacy } = req.query;
     const colors = queryColors?.split(',').map((color) => '#' + color.toLowerCase());
+    const isLegacy = queryLegacy === 'true';
 
     const checker = (arr: string[], target: string[]) => target.every((v) => arr.includes(v));
 
@@ -43,8 +45,9 @@ export const getSkinsController = async (
       const skinlineFilter = skinlineId ? !!skin.skinlines.find((skinline) => skinline.id.toString() === skinlineId) : true;
       const colorsFilter = colors?.length ? checker(allColors, colors) : true;
       const rarityFilter = rarity ? skin.rarity === rarity : true;
+      const legacyFilter = isLegacy || !skin.isLegacy;
 
-      return championIdFilter && skinlineFilter && searchFilter && colorsFilter && rarityFilter;
+      return championIdFilter && skinlineFilter && searchFilter && colorsFilter && rarityFilter && legacyFilter;
     });
 
     return res.json({ count: skins.length, data: skins });
