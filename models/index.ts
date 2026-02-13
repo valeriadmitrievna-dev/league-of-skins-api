@@ -95,7 +95,8 @@ export interface LocalSkin {
   contentId: string;
   name: string;
   image: {
-    full: string | null;
+    uncentered: string | null;
+    centered: string | null;
     loading: string | null;
   };
   video?: {

@@ -57,7 +57,8 @@ const getDataByLang = async (lang: string) => {
         description: skin.description,
         features: skin.skinFeaturePreviewData,
         image: {
-          full: getCDragonPath(skin.splashPath),
+          centered: getCDragonPath(skin.splashPath),
+          uncentered: getCDragonPath(skin.uncenteredSplashPath),
           loading: getCDragonPath(skin.loadScreenPath),
         },
         ...(skin.splashVideoPath || skin.collectionSplashVideoPath || skin.collectionCardHoverVideoPath
@@ -125,8 +126,6 @@ const prepareData = async () => {
         continue;
       }
 
-      console.log('[DEV]', `[${getDateNow()}]`, `${language} loading...`);
-
       const dataByLang = await getDataByLang(language);
       const data: LocalData = {
         lang: language,
@@ -135,7 +134,8 @@ const prepareData = async () => {
       };
       saveToJson(`./data/${language}.json`, data);
       const loadLangEnd = performance.now();
-      console.log('[DEV]', `[${getDateNow()}]`, `${language} loaded [${Math.round(loadLangEnd - loadLangStart) / 1000}s]`);
+      const loadTimeSeconds = Math.round(loadLangEnd - loadLangStart) / 1000;
+      console.log('[DEV]', `[${getDateNow()}]`, `${language} loaded [${loadTimeSeconds}s]`);
     }
 
     const prepareEndTime = performance.now();
